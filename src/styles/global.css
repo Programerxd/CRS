@@ -1,0 +1,52 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* 2. Configuración Base (Identidad de Marca) */
+@layer base {
+  html {
+    /* Usamos 'Inter' para el texto general por legibilidad */
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth; /* Desplazamiento suave al dar clic en enlaces */
+  }
+  
+  body {
+    /* Fondo blanco y texto gris oscuro suave (dark-600) */
+    @apply bg-white text-dark-600;
+    /* Suavizado de fuentes para pantallas de alta resolución */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* TÍTULOS: Forzamos Montserrat en todos los encabezados */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', system-ui, sans-serif;
+    @apply font-bold text-dark-900; /* Negrita y casi negro por defecto */
+  }
+}
+
+/* 3. Personalización de Lujo (Scrollbar Rosa) */
+@layer utilities {
+  /* Ancho de la barra */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  /* Fondo de la barra (Gris muy tenue) */
+  ::-webkit-scrollbar-track {
+    background: #F3F4F6; 
+  }
+
+  /* La barra en sí (El pulgar) */
+  ::-webkit-scrollbar-thumb {
+    /* Usa el color 'primary' (Magenta) que definimos en tailwind.config.js */
+    background-color: theme('colors.primary.DEFAULT'); 
+    border-radius: 20px; /* Bordes redondos */
+    border: 2px solid #F3F4F6; /* Un borde blanco para que se vea 'flotante' */
+  }
+
+  /* Al pasar el mouse por la barra */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: theme('colors.primary.hover');
+  }
+}

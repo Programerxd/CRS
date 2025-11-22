@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoginForm from '../modules/auth/LoginForm';
+---
+
+<Layout title="Iniciar Sesión | Cuervo Rosa Studio">
+  <main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary-dark to-secondary p-4">
+    
+    <div class="absolute top-8 left-8 text-white font-heading font-bold text-xl">
+      Cuervo Rosa Studio
+    </div>
+
+    <LoginForm client:load />
+    
+  </main>
+</Layout>

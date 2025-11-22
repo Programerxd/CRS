@@ -1,0 +1,8 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import ClientsPage from '../../modules/admin/pages/ClientsPage';
+---
+
+<AdminLayout title="Gestión de Clientes">
+    <ClientsPage client:load />
+</AdminLayout>

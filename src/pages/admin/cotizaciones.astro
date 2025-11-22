@@ -1,0 +1,8 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import QuotesBoard from '../../modules/admin/components/QuotesBoard';
+---
+
+<AdminLayout title="Gestión de Cotizaciones">
+    <QuotesBoard client:only="react" />
+</AdminLayout>

@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import UserProfileLayout from '../modules/user/UserProfileLayout';
+---
+
+<Layout title="Mi Perfil | Cuervo Rosa Studio">
+  <div class="bg-gray-50 min-h-screen py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="mb-8">
+        <h1 class="text-3xl font-heading font-bold text-dark-900">Gestión de Cuenta</h1>
+        <p class="text-dark-600">Administra tus datos personales, revisa tus citas y consulta tus cuidados.</p>
+      </div>
+
+      <UserProfileLayout client:only="react" />
+      
+    </div>
+  </div>
+</Layout>

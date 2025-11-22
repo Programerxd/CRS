@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductGrid from '../modules/store/components/ProductGrid';
+import ShoppingCartDrawer from '../modules/store/components/ShoppingCartDrawer';
+---
+
+<Layout title="Productos Profesionales | Cuervo Rosa Studio">
+  
+  <div class="bg-white pt-16 pb-12 text-center px-4">
+    <span class="text-primary font-bold tracking-widest uppercase text-xs mb-2 block">Tienda Oficial</span>
+    <h1 class="text-4xl md:text-5xl font-heading font-bold text-dark-900 mb-4">
+      Productos <span class="text-primary">Profesionales</span>
+    </h1>
+    <p class="text-dark-600 max-w-2xl mx-auto">
+      Cuida tu arte corporal con productos de la más alta calidad. Seleccionados por expertos para garantizar la mejor curación.
+    </p>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+    <ProductGrid client:load />
+  </div>
+
+  <ShoppingCartDrawer client:load />
+
+</Layout>

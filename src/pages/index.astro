@@ -1,16 +1,251 @@
 ---
-
+import Layout from "../layouts/Layout.astro";
+import { Palette, ShieldCheck, Users, ArrowRight } from "lucide-react";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Inicio | Cuervo Rosa Studio">
+  <section
+    class="relative bg-secondary-dark min-h-[85vh] flex items-center overflow-hidden"
+  >
+    <div class="absolute inset-0 z-0">
+      <img
+        src="https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?q=80&w=2070&auto=format&fit=crop"
+        alt="Tatuando"
+        class="w-full h-full object-cover opacity-40"
+      />
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-secondary-dark via-secondary-dark/80 to-transparent"
+      >
+      </div>
+    </div>
+
+    <div
+      class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+    >
+      <h1
+        class="text-5xl md:text-7xl font-heading font-extrabold text-white tracking-tight mb-6 leading-tight"
+      >
+        Arte que Habita en tu <span class="text-primary">Piel</span>
+      </h1>
+      <p
+        class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-10 font-light leading-relaxed"
+      >
+        En Cuervo Rosa Studio, transformamos ideas en arte corporal. Fusionamos
+        diseño, técnica y seguridad para crear piezas únicas que cuentan tu
+        historia.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/agendar"
+          class="bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-full font-bold text-lg shadow-glow transition-transform hover:-translate-y-1"
+        >
+          Agenda tu Cita Ahora
+        </a>
+        <a
+          href="/portafolio"
+          class="bg-white text-dark-900 hover:bg-gray-100 px-8 py-4 rounded-full font-bold text-lg shadow-lg transition-transform hover:-translate-y-1"
+        >
+          Ver Portafolio
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2
+          class="text-4xl md:text-5xl font-heading font-bold text-dark-900 mb-4"
+        >
+          Nuestro Arte en Tres <span class="text-primary">Expresiones</span>
+        </h2>
+        <p class="text-dark-600 max-w-2xl mx-auto text-lg">
+          Cada servicio es una forma de arte dedicada a crear piezas únicas y
+          significativas.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div
+          class="group bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+        >
+          <div class="h-64 overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1598371839696-5c5bb62d4d88?q=80&w=800&auto=format&fit=crop"
+              alt="Tatuajes"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+          <div class="p-8">
+            <h3 class="text-2xl font-heading font-bold text-dark-900 mb-3">
+              Tatuajes
+            </h3>
+            <p class="text-dark-600 text-sm mb-6 leading-relaxed">
+              Cada línea, cada sombra, es el resultado de un proceso creativo
+              colaborativo. Creamos diseños que son una extensión de ti.
+            </p>
+           <a href="/servicios" class="inline-flex items-center text-primary font-bold hover:underline">
+                 Ver más <ArrowRight size={18} className="ml-2"/>  </a>
+          </div>
+        </div>
+
+        <div
+          class="group bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+        >
+          <div class="h-64 overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop"
+              alt="Micropigmentación"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+          <div class="p-8">
+            <h3 class="text-2xl font-heading font-bold text-dark-900 mb-3">
+              Micropigmentación
+            </h3>
+            <p class="text-dark-600 text-sm mb-6 leading-relaxed">
+              Define, realza y armoniza tus rasgos con precisión artística. Un
+              acabado natural y duradero para tu rostro.
+            </p>
+            <a href="/servicios" class="inline-flex items-center text-primary font-bold hover:underline">
+               Ver más <ArrowRight size={18} className="ml-2"/>  </a>
+          </div>
+        </div>
+
+        <div
+          class="group bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+        >
+          <div class="h-64 overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?q=80&w=800&auto=format&fit=crop"
+              alt="Piercing"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+          <div class="p-8">
+            <h3 class="text-2xl font-heading font-bold text-dark-900 mb-3">
+              Piercings Profesionales
+            </h3>
+            <p class="text-dark-600 text-sm mb-6 leading-relaxed">
+              Una forma audaz de expresión con joyería de alta calidad y
+              materiales hipoalergénicos certificados.
+            </p>
+            <a href="/servicios" class="inline-flex items-center text-primary font-bold hover:underline">
+               Ver más <ArrowRight size={18} className="ml-2"/>  </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-heading font-bold text-dark-900">
+          ¿Por Qué Elegirnos?
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div class="flex flex-col items-center text-center group">
+          <div
+            class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300"
+          >
+            <Palette
+              size={32}
+              className="text-dark-900 group-hover:text-primary transition-colors"
+            />
+          </div>
+          <h3 class="text-xl font-bold text-dark-900 mb-3">
+            Arte Personalizado
+          </h3>
+          <p class="text-dark-600 text-sm leading-relaxed max-w-xs">
+            Cada diseño es único y creado específicamente para ti, reflejando tu
+            personalidad y estilo.
+          </p>
+        </div>
+
+        <div class="flex flex-col items-center text-center group">
+          <div
+            class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300"
+          >
+            <ShieldCheck
+              size={32}
+              className="text-dark-900 group-hover:text-primary transition-colors"
+            />
+          </div>
+          <h3 class="text-xl font-bold text-dark-900 mb-3">
+            Seguridad Garantizada
+          </h3>
+          <p class="text-dark-600 text-sm leading-relaxed max-w-xs">
+            Protocolos de esterilización estrictos y materiales de la más alta
+            calidad certificados.
+          </p>
+        </div>
+
+        <div class="flex flex-col items-center text-center group">
+          <div
+            class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300"
+          >
+            <Users
+              size={32}
+              className="text-dark-900 group-hover:text-primary transition-colors"
+            />
+          </div>
+          <h3 class="text-xl font-bold text-dark-900 mb-3">
+            Artistas Profesionales
+          </h3>
+          <p class="text-dark-600 text-sm leading-relaxed max-w-xs">
+            Equipo con años de experiencia y formación continua en las últimas
+            técnicas.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2
+        class="text-4xl md:text-5xl font-heading font-bold text-dark-900 mb-6"
+      >
+        La Pasión Detrás de la <span class="text-primary">Aguja</span>
+      </h2>
+      <p class="text-lg text-dark-600 mb-10 leading-relaxed">
+        Conoce al equipo que da vida a tus ideas. Cada artista trae una visión
+        única y un estilo inconfundible, unidos por la excelencia y el amor al
+        arte corporal.
+      </p>
+      <a
+        href="/artistas"
+        class="bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg transition-transform hover:-translate-y-1"
+      >
+        Conoce a los Artistas
+      </a>
+    </div>
+  </section>
+
+  <section class="py-24 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-secondary to-primary">
+    </div>
+
+    <div class="absolute top-0 left-0 w-full h-full bg-white/5"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
+      <h2 class="text-4xl md:text-6xl font-heading font-extrabold mb-6">
+        Tu Arte Empieza <span class="text-white/90">Aquí</span>
+      </h2>
+      <p class="text-xl text-white/80 mb-10 font-light">
+        Agenda tu cita y solicita una cotización. Estamos listos para hacer tu
+        idea realidad.
+      </p>
+      <a
+        href="/agendar"
+        class="inline-block bg-primary hover:bg-white hover:text-primary text-white px-10 py-4 rounded-full font-bold text-xl shadow-2xl transition-all transform hover:scale-105"
+      >
+        Agendar Cita
+      </a>
+    </div>
+  </section>
+</Layout>
