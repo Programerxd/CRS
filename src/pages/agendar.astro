@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BookingWizard from '../components/BookingWizard';
+---
+
+<Layout title="Agendar Cita | Cuervo Rosa Studio">
+  <div class="bg-secondary-dark min-h-screen pb-24">
+    
+    {/* Header */}
+    <div class="pt-32 pb-12 text-center px-4">
+        <h1 class="text-4xl md:text-6xl font-heading font-extrabold text-white mb-4">
+            Tu Próximo Proyecto Comienza <span class="text-primary">Aquí</span>
+        </h1>
+        <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            El proceso es simple, rápido y eficiente. Sigue los pasos para reservar tu espacio con nuestros artistas.
+        </p>
+    </div>
+
+    {/* Wizard Container */}
+    <div class="max-w-5xl mx-auto px-4">
+        <BookingWizard client:only="react" />
+    </div>
+
+  </div>
+</Layout>

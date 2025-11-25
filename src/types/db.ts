@@ -69,3 +69,50 @@ export interface PortfolioAlbum {
     galleryUrls: string[]; // Array con TODAS las fotos de adentro
     createdAt?: any;
 }
+
+export interface Artist {
+    id?: string;
+    name: string;         // Ej: "Alex Cuervo"
+    specialty: string;    // Ej: "Tatuador Residente & Fundador"
+    bio: string;          // La descripción larga
+    photoUrl: string;     // Foto vertical principal
+    active: boolean;
+    
+    // --- NUEVOS CAMPOS DE CONTACTO ---
+    instagramUrl?: string; // URL completa (https://instagram.com/...)
+    facebookUrl?: string;  // URL completa
+    whatsappNumber?: string; // Solo el número (Ej: 52199999999) para generar el link API
+    portfolioAlbumId?: string; // ID del álbum de portafolio que creamos en el paso anterior (opcional)
+    
+    createdAt?: any;
+}
+
+export interface Appointment {
+    id?: string;
+    // Datos Cliente
+    clientName: string;
+    clientEmail: string;
+    clientPhone: string;
+    
+    // Datos Proyecto
+    serviceType: 'tatuaje' | 'piercing' | 'cotizacion' | 'micro';
+    bodyPart?: string;
+    description?: string;
+    referenceImage?: string;
+
+    // Datos Agenda
+    artistId: string; // ID del artista seleccionado
+    artistName: string; // Guardamos el nombre para no hacer tantas lecturas
+    date: Timestamp; // Fecha y Hora exacta de inicio
+    durationMin: number; // Duración estimada (ej. 60, 120 min)
+    
+    // Estado
+    status: 'pendiente' | 'confirmada' | 'completada' | 'cancelada' | 'noshow';
+    depositAmount: number;
+    googleCalendarEventId?: string; // Para futura integración
+
+    notes?: string;
+    createdAt: Timestamp;
+
+    
+}

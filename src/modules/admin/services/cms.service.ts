@@ -1,65 +1,63 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  deleteDoc, 
-  doc, 
-  updateDoc, 
-  serverTimestamp, 
-  query, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  serverTimestamp,
+  query,
   orderBy,
-  arrayUnion,   
-  arrayRemove   
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 
 import { db } from "../../../firebase/client";
 
-// Importamos TODOS los tipos necesarios, incluido PortfolioAlbum
-import type { 
-  Service, 
-  PortfolioAlbum 
-} from "../../../types/db";
+// 1. IMPORTAMOS LOS TIPOS DESDE TU ARCHIVO db.ts
+import type { Artist, Service, PortfolioAlbum } from "../../../types/db";
 
-
-// --- TIPOS LOCALES (Artistas y Portafolio Simple) ---
-export interface Artist {
-  id?: string;
-  name: string;
-  specialty: string;
-  bio: string;
-  photoUrl: string;
-  active: boolean;
-}
-
+// 2. MANTENEMOS SOLO PortfolioItem SI NO ESTÁ EN DB.TS (Para la compatibilidad con lo viejo)
 export interface PortfolioItem {
   id?: string;
   title: string;
   imageUrl: string;
-  category: 'tatuaje' | 'piercing' | 'micro';
+  category: "tatuaje" | "piercing" | "micro";
 }
 
 // --- ARTISTAS ---
+// Nota: Ya no definimos 'interface Artist' aquí, usamos la importada
 export const getArtists = async () => {
   const snap = await getDocs(collection(db, "artists"));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as Artist));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Artist));
 };
 
 export const addArtist = async (artist: Artist) => {
-  await addDoc(collection(db, "artists"), { ...artist, createdAt: serverTimestamp() });
+  await addDoc(collection(db, "artists"), {
+    ...artist,
+    createdAt: serverTimestamp(),
+  });
+};
+
+export const updateArtist = async (id: string, data: Partial<Artist>) => {
+    await updateDoc(doc(db, "artists", id), data);
 };
 
 export const deleteArtist = async (id: string) => {
   await deleteDoc(doc(db, "artists", id));
 };
 
-// --- PORTAFOLIO (Simple / Legacy) ---
+// --- PORTAFOLIO (Legacy / Simple) ---
 export const getPortfolio = async () => {
   const snap = await getDocs(collection(db, "portfolio"));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as PortfolioItem));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PortfolioItem));
 };
 
 export const addPortfolioItem = async (item: PortfolioItem) => {
-  await addDoc(collection(db, "portfolio"), { ...item, createdAt: serverTimestamp() });
+  await addDoc(collection(db, "portfolio"), {
+    ...item,
+    createdAt: serverTimestamp(),
+  });
 };
 
 export const deletePortfolioItem = async (id: string) => {
@@ -70,11 +68,14 @@ export const deletePortfolioItem = async (id: string) => {
 export const getServices = async () => {
   const q = query(collection(db, "services"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as Service));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Service));
 };
 
 export const addService = async (service: Service) => {
-  await addDoc(collection(db, "services"), { ...service, createdAt: serverTimestamp() });
+  await addDoc(collection(db, "services"), {
+    ...service,
+    createdAt: serverTimestamp(),
+  });
 };
 
 export const deleteService = async (id: string) => {
@@ -82,44 +83,50 @@ export const deleteService = async (id: string) => {
 };
 
 export const updateService = async (id: string, data: Partial<Service>) => {
-    await updateDoc(doc(db, "services", id), data);
+  await updateDoc(doc(db, "services", id), data);
 };
 
 // --- ÁLBUMES DE PORTAFOLIO (NUEVO SISTEMA) ---
-
 export const getAlbums = async () => {
-  const q = query(collection(db, "portfolio_albums"), orderBy("createdAt", "desc"));
+  const q = query(
+    collection(db, "portfolio_albums"),
+    orderBy("createdAt", "desc")
+  );
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as PortfolioAlbum));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PortfolioAlbum));
 };
 
 export const createAlbum = async (album: PortfolioAlbum) => {
-  await addDoc(collection(db, "portfolio_albums"), { 
-      ...album, 
-      createdAt: serverTimestamp() 
+  await addDoc(collection(db, "portfolio_albums"), {
+    ...album,
+    createdAt: serverTimestamp(),
   });
 };
 
-export const updateAlbum = async (id: string, data: Partial<PortfolioAlbum>) => {
-    await updateDoc(doc(db, "portfolio_albums", id), data);
+export const updateAlbum = async (
+  id: string,
+  data: Partial<PortfolioAlbum>
+) => {
+  await updateDoc(doc(db, "portfolio_albums", id), data);
 };
 
-// Agregar fotos a un álbum existente (usando arrayUnion)
 export const addImagesToAlbum = async (albumId: string, newUrls: string[]) => {
-    const albumRef = doc(db, "portfolio_albums", albumId);
-    await updateDoc(albumRef, {
-        galleryUrls: arrayUnion(...newUrls)
-    });
+  const albumRef = doc(db, "portfolio_albums", albumId);
+  await updateDoc(albumRef, {
+    galleryUrls: arrayUnion(...newUrls),
+  });
 };
 
-// Quitar fotos de un álbum (usando arrayRemove)
-export const removeImageFromAlbum = async (albumId: string, urlToRemove: string) => {
-    const albumRef = doc(db, "portfolio_albums", albumId);
-    await updateDoc(albumRef, {
-        galleryUrls: arrayRemove(urlToRemove)
-    });
+export const removeImageFromAlbum = async (
+  albumId: string,
+  urlToRemove: string
+) => {
+  const albumRef = doc(db, "portfolio_albums", albumId);
+  await updateDoc(albumRef, {
+    galleryUrls: arrayRemove(urlToRemove),
+  });
 };
 
 export const deleteAlbum = async (id: string) => {
-    await deleteDoc(doc(db, "portfolio_albums", id));
+  await deleteDoc(doc(db, "portfolio_albums", id));
 };

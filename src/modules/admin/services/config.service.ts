@@ -2,15 +2,18 @@ import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } fro
 import { db } from "../../../firebase/client";
 import type { UserProfile } from "../../../types/db";
 
+// --- INTERFAZ DE CONFIGURACIÓN DEL SISTEMA ---
 export interface SystemSettings {
   studioName: string;
-  contactPhone: string; // Para los botones de WhatsApp
+  contactPhone: string;     // Para WhatsApp y mostrar
+  contactEmail: string;     // Nuevo: Para mostrar en la tarjeta
   address: string;
+  schedule: string;         // Nuevo: "Lun-Vie: 9am..."
+  googleMapsUrl: string;    // Nuevo: La URL del iframe del mapa
   instagramUrl: string;
   facebookUrl: string;
-  depositAmount: number; // Anticipo sugerido
+  depositAmount: number;
 }
-
 // --- OBTENER CONFIGURACIÓN ---
 export const getSettings = async () => {
   try {

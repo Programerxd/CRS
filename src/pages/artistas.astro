@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ArtistsSection from '../components/ArtistsSection';
+---
+
+<Layout title="Artistas y Talento | Cuervo Rosa Studio">
+  
+  {/* Header Espaciador para que el menú no tape el contenido */}
+  <div class="pt-20 bg-secondary-dark"></div>
+
+  {/* Aquí cargamos el componente visual que conecta con Firebase */}
+  <ArtistsSection client:load />
+
+</Layout>

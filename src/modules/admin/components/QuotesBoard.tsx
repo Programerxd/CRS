@@ -1,40 +1,58 @@
 import { useState, useEffect } from 'react';
-import { getQuotes, updateQuote, convertToAppointment, type Quote } from '../services/quotes.service';
-import { MessageSquare, CalendarCheck, Archive, DollarSign, ExternalLink, Image as ImageIcon, X } from 'lucide-react';
+// Iconos
+import { MessageSquare, CalendarCheck, Archive, Image as ImageIcon, X, Clock, User, DollarSign } from 'lucide-react';
+// Servicios y Tipos
+import { getQuotes, updateQuote, type Quote } from '../services/quotes.service';
+import { createAppointment } from '../services/appointments.service';
+import { getArtists } from '../services/cms.service';
+import type { Artist } from '../../../types/db';
+import { Timestamp } from 'firebase/firestore';
 
 export default function QuotesBoard() {
+  // Estados de Datos
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   
-  // Estados para el Modal de Acción
-  const [priceEstimate, setPriceEstimate] = useState('');
-  const [showConvert, setShowConvert] = useState(false); // Mostrar form de agendar
-  const [apptDate, setApptDate] = useState('');
-  const [apptDeposit, setApptDeposit] = useState('');
+  // Estado de UI
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [showConvert, setShowConvert] = useState(false); // Mostrar formulario de conversión
 
+  // Estado del Formulario de Conversión (Cita)
+  const [convertData, setConvertData] = useState({
+    date: '',
+    time: '',
+    duration: 3, // Duración por defecto (horas)
+    artistId: '',
+    deposit: ''
+  });
+
+  // Carga Inicial
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
     setLoading(true);
-    const data = await getQuotes();
-    setQuotes(data);
+    const [quotesData, artistsData] = await Promise.all([
+        getQuotes(),
+        getArtists()
+    ]);
+    setQuotes(quotesData);
+    setArtists(artistsData);
     setLoading(false);
   };
 
-  // Filtrar por columnas
+  // Filtrar columnas (Kanban)
   const newQuotes = quotes.filter(q => q.status === 'nueva');
   const negotiationQuotes = quotes.filter(q => q.status === 'negociacion');
   const closedQuotes = quotes.filter(q => ['agendada', 'archivada'].includes(q.status));
 
-  // Abrir WhatsApp Web con mensaje predefinido
+  // Acciones Rápidas
   const openWhatsApp = (quote: Quote) => {
     const msg = `Hola ${quote.clientName}, soy de Cuervo Rosa Studio. Revisé tu idea sobre el tatuaje de "${quote.description}". ¿Tienes un momento?`;
     window.open(`https://wa.me/${quote.clientPhone}?text=${encodeURIComponent(msg)}`, '_blank');
     
-    // Automáticamente mover a "Negociación" si es nueva
     if (quote.status === 'nueva') {
       handleStatusChange(quote.id, 'negociacion');
     }
@@ -43,21 +61,64 @@ export default function QuotesBoard() {
   const handleStatusChange = async (id: string, status: Quote['status']) => {
     await updateQuote(id, { status });
     loadData();
-    if (selectedQuote?.id === id) setSelectedQuote(null); // Cerrar modal
+    if (selectedQuote?.id === id) setSelectedQuote(null);
   };
 
+  // --- LÓGICA PRINCIPAL: CONVERTIR COTIZACIÓN A CITA ---
   const handleConvertToAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedQuote) return;
+    if (!selectedQuote || !convertData.date || !convertData.time || !convertData.artistId) {
+        alert("Por favor completa todos los campos (Artista, Fecha, Hora).");
+        return;
+    }
     
-    await convertToAppointment(selectedQuote, new Date(apptDate), Number(apptDeposit));
-    alert("¡Cita creada con éxito!");
-    loadData();
-    setSelectedQuote(null);
-    setShowConvert(false);
+    try {
+        // 1. Construir fecha local correcta
+        const [y, m, d] = convertData.date.split('-').map(Number);
+        const [h, min] = convertData.time.split(':').map(Number);
+        const finalDate = new Date(y, m - 1, d, h, min);
+
+        // 2. Obtener nombre del artista para referencia rápida
+        const artistName = artists.find(a => a.id === convertData.artistId)?.name || "Artista";
+
+        // 3. Intentar crear la cita (El servicio validará si hay choque de horarios)
+        const res = await createAppointment({
+            clientName: selectedQuote.clientName,
+            clientEmail: selectedQuote.email || "cotizacion@studio.com",
+            clientPhone: selectedQuote.clientPhone,
+            serviceType: 'cotizacion',
+            description: selectedQuote.description,
+            bodyPart: selectedQuote.bodyPart,
+            
+            // Datos de Agenda
+            artistId: convertData.artistId,
+            artistName: artistName,
+            date: Timestamp.fromDate(finalDate),
+            durationMin: Number(convertData.duration) * 60, // Convertir horas a minutos
+            
+            status: 'confirmada', // Nace confirmada al venir de cotización aprobada
+            depositAmount: Number(convertData.deposit) || 0,
+            createdAt: Timestamp.now()
+        });
+
+        if (res.success) {
+            // 4. Si tuvo éxito, actualizamos la cotización a "Agendada"
+            await updateQuote(selectedQuote.id, { status: 'agendada' });
+            alert("¡Cita agendada con éxito! El horario ha sido bloqueado.");
+            setShowConvert(false);
+            setSelectedQuote(null);
+            loadData();
+        } else {
+            // Error (probablemente horario ocupado)
+            alert("No se pudo agendar: " + res.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error inesperado al procesar la solicitud.");
+    }
   };
 
-  // Sub-componente para la Tarjeta (Card)
+  // Sub-componente Card
   const QuoteCard = ({ quote }: { quote: Quote }) => (
     <div 
       onClick={() => { setSelectedQuote(quote); setShowConvert(false); }}
@@ -78,10 +139,10 @@ export default function QuotesBoard() {
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col">
       
-      {/* --- TABLERO DE 3 COLUMNAS --- */}
+      {/* --- TABLERO KANBAN --- */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden min-h-0">
         
-        {/* Columna 1: Nuevas */}
+        {/* Columna 1 */}
         <div className="flex flex-col bg-gray-50/50 rounded-2xl border border-gray-200/60 h-full">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -95,7 +156,7 @@ export default function QuotesBoard() {
           </div>
         </div>
 
-        {/* Columna 2: En Negociación */}
+        {/* Columna 2 */}
         <div className="flex flex-col bg-gray-50/50 rounded-2xl border border-gray-200/60 h-full">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -109,7 +170,7 @@ export default function QuotesBoard() {
           </div>
         </div>
 
-        {/* Columna 3: Historial */}
+        {/* Columna 3 */}
         <div className="flex flex-col bg-gray-50/50 rounded-2xl border border-gray-200/60 h-full">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -122,20 +183,19 @@ export default function QuotesBoard() {
             {closedQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
           </div>
         </div>
-
       </div>
 
-      {/* --- MODAL DE DETALLE (Slide-over o Centrado) --- */}
+      {/* --- MODAL DE DETALLE Y ACCIÓN --- */}
       {selectedQuote && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-end backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white h-full shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-300">
+          <div className="w-full max-w-md bg-white h-full shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-300 border-l border-gray-100">
             
             <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-heading font-bold text-dark-900">Detalle de Solicitud</h2>
+                <h2 className="text-2xl font-heading font-bold text-dark-900">Detalle de Cotización</h2>
                 <button onClick={() => setSelectedQuote(null)} className="p-2 hover:bg-gray-100 rounded-full"><X /></button>
             </div>
 
-            {/* Información del Cliente */}
+            {/* Info Cliente */}
             <div className="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-100">
                 <div className="flex items-center gap-4 mb-3">
                     <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center font-bold text-xl">
@@ -150,82 +210,119 @@ export default function QuotesBoard() {
                     onClick={() => openWhatsApp(selectedQuote)}
                     className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold transition-colors shadow-sm"
                 >
-                    <MessageSquare size={18} /> Responder por WhatsApp
+                    <MessageSquare size={18} /> Abrir WhatsApp
                 </button>
             </div>
 
-            {/* Detalles del Tatuaje */}
+            {/* Detalles del Proyecto */}
             <div className="space-y-4 mb-8">
                 <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase">Idea / Descripción</label>
-                    <p className="text-dark-900 font-medium mt-1">{selectedQuote.description}</p>
+                    <label className="text-xs font-bold text-gray-400 uppercase">Descripción</label>
+                    <p className="text-dark-900 font-medium mt-1 text-sm leading-relaxed">{selectedQuote.description}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="text-xs font-bold text-gray-400 uppercase">Zona</label>
                         <p className="text-dark-900 font-medium mt-1">{selectedQuote.bodyPart}</p>
                     </div>
-                    <div>
-                        <label className="text-xs font-bold text-gray-400 uppercase">Tamaño Aprox.</label>
-                        <p className="text-dark-900 font-medium mt-1">{selectedQuote.sizeCm}</p>
-                    </div>
+                    {/* Agrega más campos si la interfaz Quote los tiene, como sizeCm */}
                 </div>
-                {/* Aquí iría la imagen de referencia si existiera */}
                 {selectedQuote.referenceImage && (
-                    <div className="rounded-xl overflow-hidden border border-gray-200">
-                        <img src={selectedQuote.referenceImage} alt="Ref" className="w-full h-48 object-cover" />
+                    <div className="rounded-xl overflow-hidden border border-gray-200 mt-2">
+                        <img src={selectedQuote.referenceImage} alt="Referencia" className="w-full h-auto object-cover" />
                     </div>
                 )}
             </div>
 
-            {/* Acciones de Negocio */}
-            <div className="border-t border-gray-100 pt-6 space-y-3">
-                
-                {!showConvert ? (
-                    <>
-                        {selectedQuote.status !== 'agendada' && (
-                            <button 
-                                onClick={() => setShowConvert(true)}
-                                className="w-full flex items-center justify-center gap-2 bg-dark-900 hover:bg-primary text-white py-3 rounded-xl font-bold transition-colors shadow-lg"
-                            >
-                                <CalendarCheck size={18} /> Convertir a Cita
-                            </button>
-                        )}
-                        
+            <hr className="border-gray-100 mb-6" />
+
+            {/* --- ZONA DE ACCIÓN (CONVERTIR A CITA) --- */}
+            {!showConvert ? (
+                <div className="space-y-3">
+                    {selectedQuote.status !== 'agendada' && (
+                        <button 
+                            onClick={() => {
+                                // Pre-llenar artista si ya se sabía, o dejar en blanco
+                                setConvertData({...convertData, artistId: ''});
+                                setShowConvert(true);
+                            }}
+                            className="w-full flex items-center justify-center gap-2 bg-dark-900 hover:bg-primary text-white py-3 rounded-xl font-bold transition-colors shadow-lg"
+                        >
+                            <CalendarCheck size={18} /> Agendar Cita (Cerrar Trato)
+                        </button>
+                    )}
+                    
+                    <button 
+                        onClick={() => handleStatusChange(selectedQuote.id, 'archivada')}
+                        className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 py-3 rounded-xl font-medium transition-colors"
+                    >
+                        <Archive size={18} /> Archivar / Rechazar
+                    </button>
+                </div>
+            ) : (
+                // --- FORMULARIO DE CONVERSIÓN ---
+                <form onSubmit={handleConvertToAppointment} className="bg-gray-50 p-5 rounded-2xl border border-primary/20 animate-in fade-in">
+                    <div className="flex justify-between items-center mb-4">
+                        <h4 className="font-bold text-primary flex items-center gap-2"><CalendarCheck size={18}/> Datos de la Cita</h4>
+                        <button type="button" onClick={() => setShowConvert(false)}><X size={16} className="text-gray-400"/></button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {/* Artista */}
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Artista Asignado</label>
+                            <div className="relative">
+                                <User size={16} className="absolute left-3 top-3 text-gray-400"/>
+                                <select 
+                                    required 
+                                    className="w-full pl-9 p-2 border rounded-lg bg-white text-sm"
+                                    value={convertData.artistId}
+                                    onChange={e => setConvertData({...convertData, artistId: e.target.value})}
+                                >
+                                    <option value="">Seleccionar Artista...</option>
+                                    {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Fecha y Hora */}
                         <div className="grid grid-cols-2 gap-3">
-                            <button 
-                                onClick={() => handleStatusChange(selectedQuote.id, 'archivada')}
-                                className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-red-100 hover:text-red-600 text-gray-600 py-3 rounded-xl font-medium transition-colors"
-                            >
-                                <Archive size={18} /> Archivar
-                            </button>
-                            {/* Podrías agregar botón para enviar cotización formal por PDF aquí */}
-                        </div>
-                    </>
-                ) : (
-                    // --- FORMULARIO RÁPIDO DE AGENDAR ---
-                    <form onSubmit={handleConvertToAppointment} className="bg-gray-50 p-4 rounded-xl border border-primary/20 animate-in fade-in">
-                        <h4 className="font-bold text-primary mb-4">Finalizar Reserva</h4>
-                        
-                        <div className="space-y-3 mb-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Fecha y Hora</label>
-                                <input required type="datetime-local" onChange={e => setApptDate(e.target.value)} className="w-full p-2 border rounded-lg bg-white" />
+                                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Fecha</label>
+                                <input required type="date" className="w-full p-2 border rounded-lg bg-white text-sm" onChange={e => setConvertData({...convertData, date: e.target.value})} />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Anticipo Recibido ($)</label>
-                                <input required type="number" placeholder="0.00" onChange={e => setApptDeposit(e.target.value)} className="w-full p-2 border rounded-lg bg-white" />
+                                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Hora Inicio</label>
+                                <input required type="time" className="w-full p-2 border rounded-lg bg-white text-sm" onChange={e => setConvertData({...convertData, time: e.target.value})} />
                             </div>
                         </div>
 
-                        <div className="flex gap-3">
-                            <button type="button" onClick={() => setShowConvert(false)} className="flex-1 py-2 text-gray-500 font-bold hover:bg-gray-200 rounded-lg">Cancelar</button>
-                            <button type="submit" className="flex-1 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover">Confirmar</button>
+                        {/* Duración y Anticipo */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Duración (Horas)</label>
+                                <div className="relative">
+                                    <Clock size={16} className="absolute left-3 top-2.5 text-gray-400"/>
+                                    <input required type="number" min="1" max="12" className="w-full pl-9 p-2 border rounded-lg bg-white text-sm" value={convertData.duration} onChange={e => setConvertData({...convertData, duration: Number(e.target.value)})} />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Anticipo ($)</label>
+                                <div className="relative">
+                                    <DollarSign size={16} className="absolute left-3 top-2.5 text-gray-400"/>
+                                    <input type="number" placeholder="0" className="w-full pl-9 p-2 border rounded-lg bg-white text-sm" onChange={e => setConvertData({...convertData, deposit: e.target.value})} />
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                )}
+                    </div>
 
-            </div>
+                    <div className="mt-6">
+                        <button type="submit" className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
+                            Confirmar y Bloquear Agenda
+                        </button>
+                    </div>
+                </form>
+            )}
 
           </div>
         </div>

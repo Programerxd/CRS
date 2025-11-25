@@ -15,7 +15,11 @@ export default function ConfigPage() {
     address: '',
     instagramUrl: '',
     facebookUrl: '',
-    depositAmount: 500
+    depositAmount: 500,
+    // --- AGREGA ESTOS CAMPOS QUE FALTABAN ---
+    contactEmail: '', 
+    schedule: '',
+    googleMapsUrl: ''
   });
 
   // Estado Gestión de Equipo
@@ -93,48 +97,76 @@ export default function ConfigPage() {
 
       {/* --- TAB 1: GENERAL --- */}
       {activeTab === 'general' && (
-        <form onSubmit={handleSaveSettings} className="max-w-3xl bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
-            <h3 className="font-bold text-lg border-b border-gray-100 pb-2">Datos del Negocio</h3>
+        <form onSubmit={handleSaveSettings} className="max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-8">
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre del Estudio</label>
-                    <input required value={settings.studioName} onChange={e => setSettings({...settings, studioName: e.target.value})} className="w-full p-3 border rounded-lg" />
-                </div>
-                <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Teléfono (WhatsApp)</label>
-                    <div className="relative">
-                        <Smartphone className="absolute left-3 top-3 text-gray-400" size={18} />
-                        <input required value={settings.contactPhone} onChange={e => setSettings({...settings, contactPhone: e.target.value})} className="w-full pl-10 p-3 border rounded-lg" placeholder="+52..." />
+            {/* SECCIÓN 1: INFORMACIÓN BÁSICA */}
+            <div>
+                <h3 className="font-bold text-lg text-dark-900 border-b border-gray-100 pb-2 mb-4 flex items-center gap-2">
+                    <Settings size={18} className="text-primary"/> Información del Estudio
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre del Estudio</label>
+                        <input required value={settings.studioName} onChange={e => setSettings({...settings, studioName: e.target.value})} className="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20" />
                     </div>
-                </div>
-                <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dirección Física</label>
-                    <div className="relative">
-                        <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
-                        <input value={settings.address} onChange={e => setSettings({...settings, address: e.target.value})} className="w-full pl-10 p-3 border rounded-lg" />
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dirección Física</label>
+                        <div className="relative">
+                            <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
+                            <input value={settings.address} onChange={e => setSettings({...settings, address: e.target.value})} className="w-full pl-10 p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20" />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <h3 className="font-bold text-lg border-b border-gray-100 pb-2 pt-4">Redes y Reglas</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Instagram URL</label>
-                    <div className="relative">
-                        <Globe className="absolute left-3 top-3 text-gray-400" size={18} />
-                        <input value={settings.instagramUrl} onChange={e => setSettings({...settings, instagramUrl: e.target.value})} className="w-full pl-10 p-3 border rounded-lg" />
+            {/* SECCIÓN 2: DATOS DE CONTACTO PÚBLICO */}
+            <div>
+                <h3 className="font-bold text-lg text-dark-900 border-b border-gray-100 pb-2 mb-4 flex items-center gap-2">
+                    <Smartphone size={18} className="text-primary"/> Contacto y Horarios
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">WhatsApp / Teléfono</label>
+                        <input required value={settings.contactPhone} onChange={e => setSettings({...settings, contactPhone: e.target.value})} className="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20" placeholder="5299..." />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email de Contacto</label>
+                        <input required value={settings.contactEmail || ''} onChange={e => setSettings({...settings, contactEmail: e.target.value})} className="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20" placeholder="hola@estudio.com" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Horario de Atención</label>
+                        <input value={settings.schedule || ''} onChange={e => setSettings({...settings, schedule: e.target.value})} className="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20" placeholder="Lun-Vie: 10am - 8pm" />
                     </div>
                 </div>
-                <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Anticipo Estándar ($)</label>
-                    <input type="number" value={settings.depositAmount} onChange={e => setSettings({...settings, depositAmount: Number(e.target.value)})} className="w-full p-3 border rounded-lg" />
+            </div>
+
+            {/* SECCIÓN 3: MAPA Y REDES */}
+            <div>
+                <h3 className="font-bold text-lg text-dark-900 border-b border-gray-100 pb-2 mb-4 flex items-center gap-2">
+                    <Globe size={18} className="text-primary"/> Mapa y Redes
+                </h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Google Maps Embed URL (src)</label>
+                        <input value={settings.googleMapsUrl || ''} onChange={e => setSettings({...settings, googleMapsUrl: e.target.value})} className="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20 text-xs font-mono text-gray-500" placeholder="https://www.google.com/maps/embed?..." />
+                        <p className="text-[10px] text-gray-400 mt-1">Ve a Google Maps {'>'} Compartir {'>'} Insertar un mapa {'>'} Copia solo lo que está dentro de src="..."</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Instagram URL</label>
+                            <input value={settings.instagramUrl} onChange={e => setSettings({...settings, instagramUrl: e.target.value})} className="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Facebook URL</label>
+                            <input value={settings.facebookUrl} onChange={e => setSettings({...settings, facebookUrl: e.target.value})} className="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-primary/20" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div className="flex justify-end pt-4">
-                <button disabled={loading} className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-hover transition-all">
-                    <Save size={20} /> Guardar Configuración
+                <button disabled={loading} className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-hover transition-all shadow-lg">
+                    <Save size={20} /> Guardar Cambios
                 </button>
             </div>
         </form>
