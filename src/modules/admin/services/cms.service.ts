@@ -1,15 +1,33 @@
 import { 
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp 
+  collection, 
+  addDoc, 
+  getDocs, 
+  deleteDoc, 
+  doc, 
+  updateDoc, 
+  serverTimestamp, 
+  query, 
+  orderBy,
+  arrayUnion,   
+  arrayRemove   
 } from "firebase/firestore";
+
 import { db } from "../../../firebase/client";
 
-// --- TIPOS ---
+// Importamos TODOS los tipos necesarios, incluido PortfolioAlbum
+import type { 
+  Service, 
+  PortfolioAlbum 
+} from "../../../types/db";
+
+
+// --- TIPOS LOCALES (Artistas y Portafolio Simple) ---
 export interface Artist {
   id?: string;
   name: string;
   specialty: string;
   bio: string;
-  photoUrl: string; // Por ahora pondremos URLs manuales, luego implementamos Storage
+  photoUrl: string;
   active: boolean;
 }
 
@@ -34,7 +52,7 @@ export const deleteArtist = async (id: string) => {
   await deleteDoc(doc(db, "artists", id));
 };
 
-// --- PORTAFOLIO ---
+// --- PORTAFOLIO (Simple / Legacy) ---
 export const getPortfolio = async () => {
   const snap = await getDocs(collection(db, "portfolio"));
   return snap.docs.map(d => ({ id: d.id, ...d.data() } as PortfolioItem));
@@ -46,4 +64,62 @@ export const addPortfolioItem = async (item: PortfolioItem) => {
 
 export const deletePortfolioItem = async (id: string) => {
   await deleteDoc(doc(db, "portfolio", id));
+};
+
+// --- SERVICIOS ---
+export const getServices = async () => {
+  const q = query(collection(db, "services"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() } as Service));
+};
+
+export const addService = async (service: Service) => {
+  await addDoc(collection(db, "services"), { ...service, createdAt: serverTimestamp() });
+};
+
+export const deleteService = async (id: string) => {
+  await deleteDoc(doc(db, "services", id));
+};
+
+export const updateService = async (id: string, data: Partial<Service>) => {
+    await updateDoc(doc(db, "services", id), data);
+};
+
+// --- ÁLBUMES DE PORTAFOLIO (NUEVO SISTEMA) ---
+
+export const getAlbums = async () => {
+  const q = query(collection(db, "portfolio_albums"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() } as PortfolioAlbum));
+};
+
+export const createAlbum = async (album: PortfolioAlbum) => {
+  await addDoc(collection(db, "portfolio_albums"), { 
+      ...album, 
+      createdAt: serverTimestamp() 
+  });
+};
+
+export const updateAlbum = async (id: string, data: Partial<PortfolioAlbum>) => {
+    await updateDoc(doc(db, "portfolio_albums", id), data);
+};
+
+// Agregar fotos a un álbum existente (usando arrayUnion)
+export const addImagesToAlbum = async (albumId: string, newUrls: string[]) => {
+    const albumRef = doc(db, "portfolio_albums", albumId);
+    await updateDoc(albumRef, {
+        galleryUrls: arrayUnion(...newUrls)
+    });
+};
+
+// Quitar fotos de un álbum (usando arrayRemove)
+export const removeImageFromAlbum = async (albumId: string, urlToRemove: string) => {
+    const albumRef = doc(db, "portfolio_albums", albumId);
+    await updateDoc(albumRef, {
+        galleryUrls: arrayRemove(urlToRemove)
+    });
+};
+
+export const deleteAlbum = async (id: string) => {
+    await deleteDoc(doc(db, "portfolio_albums", id));
 };

@@ -42,3 +42,30 @@ export interface Quote {
     status: 'nueva' | 'negociacion' | 'agendada' | 'archivada';
     createdAt: Timestamp;
 }
+
+// ... (tus otras interfaces)
+
+export interface ServiceDetail {
+    title: string;       // Ej: "Proceso"
+    description: string; // Ej: "Desde el diseño..."
+    iconKey: 'edit' | 'shield' | 'check' | 'star'; // Para mapear el icono en el frontend
+}
+
+export interface Service {
+    id?: string;
+    title: string;           // Ej: "Tatuajes"
+    mainDescription: string; // La descripción larga principal
+    imageUrl: string;        // URL de Firebase Storage
+    details: ServiceDetail[]; // Array con los puntos (Proceso, Materiales, etc.)
+    active: boolean;
+    createdAt?: any;
+}
+
+export interface PortfolioAlbum {
+    id?: string;
+    title: string;        // Ej: "Tatuajes Realistas"
+    subtitle?: string;    // Ej: "Nuestros mejores trabajos en sombra"
+    coverUrl: string;     // La imagen que se ve en la tarjeta principal
+    galleryUrls: string[]; // Array con TODAS las fotos de adentro
+    createdAt?: any;
+}

@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ServicesSection from '../components/ServicesSection';
+---
+
+<Layout title="Nuestros Servicios | Cuervo Rosa Studio">
+  
+  {/* Encabezado: Aquí usamos 'class' porque estamos en un archivo .astro (HTML estándar) */}
+  <div class="bg-secondary-dark py-20 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4">
+        <span class="text-primary font-bold tracking-widest uppercase text-xs mb-4 block">Experiencia Profesional</span>
+        <h1 class="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
+          Servicios Especializados
+        </h1>
+        <p class="text-gray-300 max-w-2xl mx-auto text-lg">
+          Explora nuestra gama de servicios de arte corporal, diseñados para ofrecerte la mejor experiencia y resultados seguros.
+        </p>
+    </div>
+  </div>
+
+  {/* Sección Dinámica: Este es el componente de React que carga los datos */}
+  <ServicesSection client:load />
+
+</Layout>

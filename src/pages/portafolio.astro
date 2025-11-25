@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PortfolioViewer from '../components/PortfolioViewer';
+---
+
+<Layout title="Portafolio | Cuervo Rosa Studio">
+  
+  {/* Header simple porque el componente React maneja sus propios headers dinámicos */}
+  <div class="pt-20"></div> 
+
+  <PortfolioViewer client:load />
+
+</Layout>
