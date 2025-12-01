@@ -6,7 +6,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider 
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore"; // <--- IMPORTACIONES NUEVAS
+import { doc, setDoc, serverTimestamp, getDoc, updateDoc} from "firebase/firestore"; // <--- IMPORTACIONES NUEVAS
 import { auth, db } from "../../firebase/client"; // <--- AGREGAMOS 'db'
 
 // --- TIPOS ---
@@ -58,27 +58,41 @@ export const loginUser = async ({ email, password }: AuthCredentials) => {
   }
 };
 
-// --- LOGIN CON GOOGLE (MEJORADO) ---
+// --- LOGIN CON GOOGLE (CORREGIDO) ---
 export const loginWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
+    
+    // 1. ESTO OBLIGA A MOSTRAR EL SELECTOR DE CUENTAS SIEMPRE
+    provider.setCustomParameters({
+      prompt: "select_account"
+    });
+
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Validar si el usuario ya existe en Firestore para no sobrescribirlo
+    // Referencia al documento del usuario
     const userDocRef = doc(db, "users", user.uid);
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
-      // Si es la primera vez que entra con Google, lo guardamos en la BD
+      // A. Si es usuario NUEVO, lo creamos completo
       await setDoc(userDocRef, {
         uid: user.uid,
         email: user.email,
         displayName: user.displayName || "Usuario Google",
         role: 'client',
         createdAt: serverTimestamp(),
-        photoURL: user.photoURL,
+        photoURL: user.photoURL, // Guardamos la foto
         phoneNumber: user.phoneNumber || null
+      });
+    } else {
+      // B. Si el usuario YA EXISTE, actualizamos su foto y nombre
+      // Esto corrige el problema de que no se vea la foto si ya te habías registrado antes
+      await updateDoc(userDocRef, {
+        photoURL: user.photoURL,
+        displayName: user.displayName || "Usuario",
+        // No tocamos el rol ni la fecha de creación
       });
     }
 

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { auth } from '../../../firebase/client';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { clearCart } from '../../../store/cartStore'; // <--- 1. IMPORTAR ESTO
 
 // DEFINICIÓN DE PROPS (Recibimos la ruta desde el servidor Astro)
 interface AdminSidebarProps {
@@ -46,11 +47,16 @@ export default function AdminSidebar({ currentPath }: AdminSidebarProps) {
     return () => unsubscribe();
   }, []);
 
-  // FUNCIONALIDAD DE CERRAR SESIÓN (Hard Refresh intencional)
+  // FUNCIONALIDAD DE CERRAR SESIÓN (Actualizada con seguridad)
   const handleLogout = async () => {
     try {
+      // 2. Limpiar datos locales (Carrito) por seguridad
+      clearCart();
+
+      // 3. Cerrar sesión en Firebase
       await signOut(auth);
-      // Forzamos recarga completa para limpiar memoria y estado
+      
+      // 4. Redirigir al login
       window.location.href = "/login";
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

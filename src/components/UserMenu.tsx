@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { auth } from '../firebase/client';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { LogOut, User as UserIcon, X } from 'lucide-react'; // Asegúrate de tener instalada lucide-react
+import { LogOut, X } from 'lucide-react';
+import { clearCart } from '../store/cartStore';
 
 export default function UserMenu() {
   const [user, setUser] = useState<User | null>(null);
@@ -30,6 +31,7 @@ export default function UserMenu() {
   }, []);
 
   const handleLogout = async () => {
+    clearCart();
     await signOut(auth);
     window.location.href = "/login";
   };
@@ -55,12 +57,17 @@ export default function UserMenu() {
       {/* --- TRIGGER (El circulito en el Navbar) --- */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all border-2 ${
+        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all border-2 overflow-hidden ${
           isOpen ? 'ring-2 ring-primary border-white' : 'border-transparent hover:bg-gray-100'
         } ${user.photoURL ? '' : 'bg-primary text-white'}`}
       >
         {user.photoURL ? (
-            <img src={user.photoURL} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+            <img 
+              src={user.photoURL} 
+              alt="Avatar" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer" // <--- CLAVE: Para que Google permita cargar la imagen
+            />
         ) : (
             initial
         )}
@@ -70,7 +77,7 @@ export default function UserMenu() {
       {isOpen && (
         <div className="absolute right-0 mt-3 w-[350px] bg-white rounded-3xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           
-          {/* Botón cerrar (estilo Google mobile, opcional en desktop pero útil) */}
+          {/* Botón cerrar */}
           <button 
             onClick={() => setIsOpen(false)}
             className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 text-gray-500"
@@ -87,11 +94,16 @@ export default function UserMenu() {
             {/* Avatar Grande */}
             <div className="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-bold mb-3 ring-4 ring-white shadow-lg relative">
                {user.photoURL ? (
-                 <img src={user.photoURL} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                 <img 
+                    src={user.photoURL} 
+                    alt="Avatar" 
+                    className="w-full h-full rounded-full object-cover"
+                    referrerPolicy="no-referrer" // <--- CLAVE TAMBIÉN AQUÍ
+                 />
                ) : (
                  initial
                )}
-               {/* Icono de cámara pequeño (decorativo por ahora) */}
+               {/* Icono de estado */}
                <div className="absolute bottom-0 right-0 bg-white text-dark-900 p-1.5 rounded-full shadow-sm border border-gray-100">
                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                </div>
@@ -116,8 +128,6 @@ export default function UserMenu() {
 
           {/* --- ACCIONES INFERIORES --- */}
           <div className="p-2 bg-gray-50/50">
-             {/* Aquí podrías poner "Agregar cuenta" en el futuro */}
-             
              <button 
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl hover:bg-gray-100 text-dark-600 text-sm font-medium transition-colors"
@@ -127,7 +137,7 @@ export default function UserMenu() {
              </button>
           </div>
           
-          {/* Links legales estilo Google (pie de página del menú) */}
+          {/* Links legales */}
           <div className="py-3 text-center bg-gray-50 border-t border-gray-100">
               <p className="text-[10px] text-gray-400">
                   Política de Privacidad • Términos de Servicio
