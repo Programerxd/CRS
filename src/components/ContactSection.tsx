@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Clock, Send, Lock, Loader2 } from 'lucide-react';
 import { getSettings, type SystemSettings } from '../modules/admin/services/config.service';
 import { auth } from '../firebase/client';
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import { createQuote } from '../modules/admin/services/quotes.service';
 
 export default function ContactSection() {
   const [settings, setSettings] = useState<SystemSettings | null>(null);
@@ -29,12 +30,28 @@ export default function ContactSection() {
     return () => unsubscribe();
   }, []);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!settings?.contactPhone) return;
 
+      // 1. PRIMERO GUARDAMOS EN FIREBASE (CRM)
+      // Usamos 'user' (la sesión iniciada) para los datos
+      await createQuote({
+          clientName: user?.displayName || "Usuario Web",
+          clientEmail: user?.email || "",
+          clientPhone: "N/A", // El usuario de contacto a veces no tiene tel en su perfil, o podrías pedirlo
+          description: formData.message,
+          bodyPart: "Consulta General",
+          status: 'nueva'
+      });
+
+      // 2. LUEGO ABRIMOS WHATSAPP
       const text = `Hola, soy ${user?.displayName || 'un cliente'}.%0A%0A${formData.message}`;
       window.open(`https://wa.me/${settings.contactPhone}?text=${text}`, '_blank');
+      
+      // Opcional: Limpiar form o mostrar aviso de éxito
+      setFormData({ message: '' });
+      alert("¡Mensaje registrado! Te responderemos pronto.");
   };
 
   if (loading) return <div className="min-h-[60vh] flex justify-center items-center"><Loader2 className="animate-spin text-primary"/></div>;

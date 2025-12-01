@@ -6,7 +6,8 @@ import {
   updateDoc, 
   doc, 
   orderBy,
-  addDoc,
+  addDoc,       // <--- Asegúrate de importar esto
+  serverTimestamp,
   Timestamp
 } from "firebase/firestore";
 import { db } from "../../../firebase/client";
@@ -38,6 +39,21 @@ export const getQuotes = async () => {
   } catch (error) {
     console.error("Error al traer cotizaciones:", error);
     return [];
+  }
+};
+
+
+export const createQuote = async (quoteData: any) => {
+  try {
+    await addDoc(collection(db, COLLECTION), {
+      ...quoteData,
+      status: 'nueva', // Siempre nacen como nuevas
+      createdAt: serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error creando cotización:", error);
+    return { success: false, error };
   }
 };
 

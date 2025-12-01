@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
+    "@nanostores/persistent": "^1.2.0",
     "@nanostores/react": "^1.0.0",
+    "@paypal/react-paypal-js": "^8.9.2",
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.16.0",

@@ -16,6 +16,7 @@ import {
 } from "../modules/admin/services/appointments.service";
 import type { Artist } from "../types/db";
 import { Timestamp } from "firebase/firestore";
+import { createQuote } from "../modules/admin/services/quotes.service";
 
 const STEPS = [
   "Servicio & Artista",
@@ -126,31 +127,57 @@ export default function BookingWizard() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const [hours] = formData.time.split(":");
-      const finalDate = new Date(formData.date!);
-      finalDate.setHours(parseInt(hours), 0, 0);
+      // LÓGICA DIFERENCIADA
+      if (formData.serviceType === "cotizacion") {
+        // --- CASO 1: ES UNA COTIZACIÓN (Va al Tablero de Cotizaciones) ---
+        const quoteData = {
+          clientName: formData.clientName,
+          clientEmail: formData.clientEmail,
+          clientPhone: formData.clientPhone,
+          description: formData.description || "Solicitud desde Web",
+          bodyPart: formData.bodyPart || "No especificado",
+          // Guardamos la fecha/artista preferido en la descripción para no perder el dato
+          preferenceDetails: `Fecha deseada: ${formData.date?.toLocaleDateString()} ${
+            formData.time
+          }. Artista: ${formData.artistName}`,
+          artistId: formData.artistId, // Opcional si tu tipo Quote lo soporta
+        };
 
-      const appointmentData: any = {
-        clientName: formData.clientName,
-        clientEmail: formData.clientEmail,
-        clientPhone: formData.clientPhone,
-        serviceType: formData.serviceType,
-        bodyPart: formData.bodyPart,
-        description: formData.description,
-        artistId: formData.artistId,
-        artistName: formData.artistName,
-        date: Timestamp.fromDate(finalDate),
-        status: "pendiente",
-        durationMin: 60,
-        depositAmount: 0,
-      };
+        const res = await createQuote(quoteData);
 
-      const res = await createAppointment(appointmentData);
-
-      if (res.success) {
-        setCurrentStep(3);
+        if (res.success) {
+          setCurrentStep(3); // Éxito
+        } else {
+          alert("Error al enviar cotización.");
+        }
       } else {
-        alert("Error al agendar. Revisa tu conexión.");
+        // --- CASO 2: ES UNA CITA DIRECTA (Va a la Agenda) ---
+        const [hours] = formData.time.split(":");
+        const finalDate = new Date(formData.date!);
+        finalDate.setHours(parseInt(hours), 0, 0);
+
+        const appointmentData: any = {
+          clientName: formData.clientName,
+          clientEmail: formData.clientEmail,
+          clientPhone: formData.clientPhone,
+          serviceType: formData.serviceType,
+          bodyPart: formData.bodyPart,
+          description: formData.description,
+          artistId: formData.artistId,
+          artistName: formData.artistName,
+          date: Timestamp.fromDate(finalDate),
+          status: "pendiente", // Cita requiere confirmación
+          durationMin: 60,
+          depositAmount: 0,
+        };
+
+        const res = await createAppointment(appointmentData);
+
+        if (res.success) {
+          setCurrentStep(3);
+        } else {
+          alert("Error al agendar. El horario podría estar ocupado.");
+        }
       }
     } catch (e) {
       console.error(e);
@@ -357,17 +384,10 @@ export default function BookingWizard() {
           </div>
         )}
 
-        {/* PASO 3: DATOS (Igual que antes) */}
+        {/* PASO 3: DATOS DEL CLIENTE */}
         {currentStep === 2 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-8 max-w-2xl mx-auto">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-heading font-bold text-dark-900">
-                Casi listo
-              </h3>
-              <p className="text-gray-500">
-                Necesitamos tus datos para confirmar la reserva.
-              </p>
-            </div>
+            {/* ... (Header y campos de Nombre/Teléfono/Email siguen igual) ... */}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
@@ -397,6 +417,7 @@ export default function BookingWizard() {
                 />
               </div>
             </div>
+
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-500 uppercase">
                 Correo Electrónico
@@ -411,13 +432,44 @@ export default function BookingWizard() {
                 }
               />
             </div>
+
+            {/* --- AQUÍ ESTÁ EL CAMBIO: SEPARAMOS LOS CAMPOS --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">
+                  Zona del Cuerpo
+                </label>
+                <input
+                  required
+                  className="w-full p-3 bg-gray-50 border rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
+                  placeholder="Ej: Antebrazo, Espalda..."
+                  value={formData.bodyPart}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bodyPart: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">
+                  Tamaño Aprox (cm)
+                </label>
+                <input
+                  className="w-full p-3 bg-gray-50 border rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
+                  placeholder="Ej: 15x10 cm"
+                  // Puedes guardar esto en description o crear un campo nuevo en formData si quieres ser muy estricto
+                  // Por simplicidad, lo concatenaré a la descripción al enviar, o puedes agregarlo al estado
+                />
+              </div>
+            </div>
+
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-500 uppercase">
-                Idea / Zona del cuerpo
+                Descripción de tu Idea
               </label>
               <textarea
+                required
                 className="w-full p-3 bg-gray-50 border rounded-lg h-24 resize-none focus:bg-white focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
-                placeholder="Describe tu idea..."
+                placeholder="Cuéntanos qué quieres hacerte (estilo, elementos, significado)..."
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })

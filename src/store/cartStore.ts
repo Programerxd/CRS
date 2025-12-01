@@ -1,18 +1,26 @@
-// 1. Importamos 'atom' además de map y computed
 import { map, atom, computed } from 'nanostores';
+import { persistentMap } from '@nanostores/persistent'; // <--- Nuevo
 import type { Product } from '../types/db';
 
 export interface CartItem extends Product {
   quantity: number;
 }
 
-// EL CARRITO (Es un objeto complejo, usa map)
-export const $cart = map<Record<string, CartItem>>({});
+// 1. CAMBIO CLAVE: Usamos persistentMap en lugar de map simple
+// Esto guarda automáticamente en localStorage con la clave 'crs_cart'
+// Como persistentMap guarda strings, necesitamos codificar/decodificar JSON automáticamente
+export const $cart = persistentMap<Record<string, CartItem>>(
+  'crs_cart', 
+  {}, 
+  {
+    encode: JSON.stringify,
+    decode: JSON.parse
+  }
+);
 
-// VISIBILIDAD DEL CARRITO (Es true/false, usa atom) -> CORRECCIÓN AQUÍ
 export const $isCartOpen = atom<boolean>(false);
 
-// --- ACCIONES ---
+// --- ACCIONES (Ligeros ajustes para persistentMap) ---
 
 export function addToCart(product: Product) {
   const cart = $cart.get();
@@ -31,15 +39,16 @@ export function addToCart(product: Product) {
 }
 
 export function removeFromCart(productId: string) {
-  const cart = $cart.get();
-  const { [productId]: _, ...rest } = cart;
-  $cart.set(rest);
+  // persistentMap tiene setKey para borrar si pasas undefined, pero para borrar del objeto:
+  const cart = { ...$cart.get() };
+  delete cart[productId];
+  $cart.set(cart);
 }
 
 export function decreaseQuantity(productId: string) {
   const cart = $cart.get();
   const item = cart[productId];
-  if (item.quantity > 1) {
+  if (item && item.quantity > 1) {
     $cart.setKey(productId, { ...item, quantity: item.quantity - 1 });
   } else {
     removeFromCart(productId);

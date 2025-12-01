@@ -2,6 +2,7 @@ import { collection, query, where, getDocs, runTransaction, doc, addDoc, serverT
 import { db } from "../../../firebase/client";
 import type { Product } from "../../../types/db";
 import type { CartItem } from "../../../store/cartStore";
+import { setDoc , getDoc} from "firebase/firestore";
 
 // 1. OBTENER PRODUCTOS (Solo los de categoría 'venta')
 export const getProductsForSale = async () => {
@@ -52,4 +53,31 @@ export const processOrder = async (cartItems: CartItem[], clientInfo: any) => {
     console.error("Error en transacción:", error);
     return { success: false, error };
   }
+};
+
+export const saveCartToCloud = async (userId: string, cartItems: Record<string, CartItem>) => {
+    if (!userId) return;
+    try {
+        // Guardamos en una subcolección o documento del usuario
+        await setDoc(doc(db, "users", userId, "cart", "active"), { 
+            items: cartItems,
+            updatedAt: new Date()
+        });
+    } catch (error) {
+        console.error("Error guardando carrito en nube:", error);
+    }
+};
+
+// 2. Recuperar Carrito de la Nube
+export const getCartFromCloud = async (userId: string) => {
+    if (!userId) return {};
+    try {
+        const snap = await getDoc(doc(db, "users", userId, "cart", "active"));
+        if (snap.exists()) {
+            return snap.data().items as Record<string, CartItem>;
+        }
+    } catch (error) {
+        console.error("Error recuperando carrito:", error);
+    }
+    return {};
 };

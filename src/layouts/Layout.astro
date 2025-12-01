@@ -1,7 +1,12 @@
 ---
-// Importamos los estilos globales que configuramos antes
+// Importamos los estilos globales
 import '../styles/global.css';
 import UserMenu from '../components/UserMenu';
+// 1. Importar componente del botón del carrito (el icono con el contador)
+import CartTrigger from '../components/CartTrigger';
+// 2. Importar el cajón del carrito para que sea global
+import ShoppingCartDrawer from '../modules/store/components/ShoppingCartDrawer';
+import CartSynchronizer from '../components/CartSynchronizer';
 
 interface Props {
   title: string;
@@ -10,7 +15,7 @@ interface Props {
 
 const { title, description = "Cuervo Rosa Studio - Arte corporal seguro y personalizado." } = Astro.props;
 
-// Links de navegación según el PDF y capturas
+// Links de navegación
 const links = [
   { name: "Inicio", href: "/" },
   { name: "Productos", href: "/productos" },
@@ -56,17 +61,27 @@ const links = [
           </nav>
 
           <div class="hidden md:flex items-center space-x-4">
+            {/* 3. BOTÓN DEL CARRITO (Desktop) - Siempre visible */}
+            <CartTrigger client:load />
+
             <UserMenu client:only="react" />
+            
             <a href="/agendar" class="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg transition-all transform hover:scale-105">
               Agendar Cita
             </a>
           </div>
 
-          <button class="md:hidden text-dark-900 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          {/* Menú Móvil y Carrito Móvil */}
+          <div class="flex items-center gap-4 md:hidden">
+            {/* 4. BOTÓN DEL CARRITO (Móvil) - Visible también aquí */}
+            <CartTrigger client:load />
+
+            <button class="text-dark-900 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -123,6 +138,10 @@ const links = [
         </div>
       </div>
     </footer>
+
+    {/* 5. COMPONENTE GLOBAL DEL CARRITO (Funciona en todo el sitio) */}
+    <ShoppingCartDrawer client:load />
+    <CartSynchronizer client:only="react" />
 
   </body>
 </html>
