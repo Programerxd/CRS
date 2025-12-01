@@ -2,11 +2,13 @@
 // Importamos los estilos globales
 import '../styles/global.css';
 import UserMenu from '../components/UserMenu';
-// 1. Importar componente del botón del carrito (el icono con el contador)
+// 1. Importar componente del botón del carrito
 import CartTrigger from '../components/CartTrigger';
-// 2. Importar el cajón del carrito para que sea global
+// 2. Importar el cajón del carrito
 import ShoppingCartDrawer from '../modules/store/components/ShoppingCartDrawer';
 import CartSynchronizer from '../components/CartSynchronizer';
+// 3. IMPORTAR EL NUEVO FOOTER DINÁMICO
+import Footer from '../components/Footer';
 
 interface Props {
   title: string;
@@ -15,7 +17,6 @@ interface Props {
 
 const { title, description = "Cuervo Rosa Studio - Arte corporal seguro y personalizado." } = Astro.props;
 
-// Links de navegación
 const links = [
   { name: "Inicio", href: "/" },
   { name: "Productos", href: "/productos" },
@@ -61,21 +62,15 @@ const links = [
           </nav>
 
           <div class="hidden md:flex items-center space-x-4">
-            {/* 3. BOTÓN DEL CARRITO (Desktop) - Siempre visible */}
             <CartTrigger client:load />
-
             <UserMenu client:only="react" />
-            
             <a href="/agendar" class="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg transition-all transform hover:scale-105">
               Agendar Cita
             </a>
           </div>
 
-          {/* Menú Móvil y Carrito Móvil */}
           <div class="flex items-center gap-4 md:hidden">
-            {/* 4. BOTÓN DEL CARRITO (Móvil) - Visible también aquí */}
             <CartTrigger client:load />
-
             <button class="text-dark-900 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -90,56 +85,10 @@ const links = [
       <slot />
     </main>
 
-    <footer class="bg-white border-t border-gray-100 pt-16 pb-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          
-          <div class="col-span-1 md:col-span-1">
-            <span class="font-heading font-extrabold text-xl text-primary mb-4 block">Cuervo Rosa Studio</span>
-            <p class="text-sm text-gray-500 leading-relaxed">
-              Arte corporal seguro y personalizado. Transformamos ideas en arte con los más altos estándares de higiene.
-            </p>
-          </div>
+    {/* 4. REEMPLAZAMOS TODO EL HTML DEL FOOTER POR ESTE COMPONENTE INTELIGENTE */}
+    {/* Usamos client:visible para que se cargue solo cuando el usuario baje hasta el final */}
+    <Footer client:visible />
 
-          <div>
-            <h3 class="font-heading font-bold text-dark-900 mb-4 uppercase text-sm">Navegación</h3>
-            <ul class="space-y-3 text-sm">
-              <li><a href="/" class="hover:text-primary transition-colors">Inicio</a></li>
-              <li><a href="/portafolio" class="hover:text-primary transition-colors">Portafolio</a></li>
-              <li><a href="/servicios" class="hover:text-primary transition-colors">Servicios</a></li>
-              <li><a href="/artistas" class="hover:text-primary transition-colors">Artistas</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 class="font-heading font-bold text-dark-900 mb-4 uppercase text-sm">Contacto</h3>
-            <ul class="space-y-3 text-sm text-gray-500">
-              <li>Oxkutzcab, Yucatán</li>
-              <li>Tel: +52 997 123 4567</li>
-              <li>info@cuervorosa.studio</li>
-              <li>Lun - Sáb: 11:00 - 20:00</li>
-            </ul>
-          </div>
-
-           <div>
-            <h3 class="font-heading font-bold text-dark-900 mb-4 uppercase text-sm">Conéctate</h3>
-            <p class="text-sm text-gray-500 mb-4">@CuervoRosaStudio</p>
-            <div class="flex space-x-4">
-              <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-dark-900 hover:bg-primary hover:text-white transition-colors cursor-pointer">IG</div>
-              <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-dark-900 hover:bg-primary hover:text-white transition-colors cursor-pointer">FB</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="border-t border-gray-100 pt-8 text-center">
-          <p class="text-xs text-gray-400">
-            &copy; 2025 Cuervo Rosa Studio. Todos los derechos reservados.
-          </p>
-        </div>
-      </div>
-    </footer>
-
-    {/* 5. COMPONENTE GLOBAL DEL CARRITO (Funciona en todo el sitio) */}
     <ShoppingCartDrawer client:load />
     <CartSynchronizer client:only="react" />
 
