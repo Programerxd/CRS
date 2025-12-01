@@ -1,30 +1,26 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, Lock, Loader2 } from 'lucide-react';
-import { getSettings, type SystemSettings } from '../modules/admin/services/config.service';
+import { useStore } from '@nanostores/react'; // Importamos el hook para leer el store
+import { MapPin, Phone, Mail, Clock, Send, Lock } from 'lucide-react';
+import { $settings } from '../store/settingsStore'; // Importamos el store global reactivo
 import { auth } from '../firebase/client';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { createQuote } from '../modules/admin/services/quotes.service';
 
 export default function ContactSection() {
-  const [settings, setSettings] = useState<SystemSettings | null>(null);
+  // 1. Usamos useStore para leer la configuración en tiempo real
+  // Al cambiar algo en Firebase, esta variable se actualiza sola automáticamente.
+  const settings = useStore($settings); 
+  
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   
   // Estado del formulario
   const [formData, setFormData] = useState({ message: '' });
 
   useEffect(() => {
-    // 1. Cargar Configuración
-    const fetchSettings = async () => {
-        const data = await getSettings();
-        setSettings(data);
-    };
-
-    // 2. Escuchar Auth
+    // 2. Solo necesitamos escuchar la autenticación
+    // La configuración ya viene manejada por el store global
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         setUser(currentUser);
-        // Una vez que tenemos usuario (o no), y cargó settings, quitamos loading
-        fetchSettings().then(() => setLoading(false));
     });
 
     return () => unsubscribe();
@@ -32,29 +28,32 @@ export default function ContactSection() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!settings?.contactPhone) return;
+      
+      // Validación usando los datos del store
+      if (!settings.contactPhone) {
+          return alert("El teléfono de contacto no está configurado en el sistema.");
+      }
 
-      // 1. PRIMERO GUARDAMOS EN FIREBASE (CRM)
-      // Usamos 'user' (la sesión iniciada) para los datos
+      // 1. Guardar en Firebase (CRM)
       await createQuote({
           clientName: user?.displayName || "Usuario Web",
           clientEmail: user?.email || "",
-          clientPhone: "N/A", // El usuario de contacto a veces no tiene tel en su perfil, o podrías pedirlo
+          clientPhone: "N/A", 
           description: formData.message,
           bodyPart: "Consulta General",
           status: 'nueva'
       });
 
-      // 2. LUEGO ABRIMOS WHATSAPP
+      // 2. Abrir WhatsApp
       const text = `Hola, soy ${user?.displayName || 'un cliente'}.%0A%0A${formData.message}`;
       window.open(`https://wa.me/${settings.contactPhone}?text=${text}`, '_blank');
       
-      // Opcional: Limpiar form o mostrar aviso de éxito
       setFormData({ message: '' });
-      alert("¡Mensaje registrado! Te responderemos pronto.");
+      // Opcional: Feedback visual
   };
 
-  if (loading) return <div className="min-h-[60vh] flex justify-center items-center"><Loader2 className="animate-spin text-primary"/></div>;
+  // Nota: Ya no necesitamos un estado de "loading" bloqueante para toda la sección
+  // porque el store tiene valores iniciales por defecto.
 
   return (
     <section className="bg-gray-50 min-h-screen py-20">
@@ -84,7 +83,8 @@ export default function ContactSection() {
                         </div>
                         <div>
                             <h4 className="font-bold text-dark-900 text-lg mb-1">Dirección</h4>
-                            <p className="text-gray-500 leading-relaxed">{settings?.address || 'Ubicación pendiente'}</p>
+                            {/* Usamos directamente la variable reactiva 'settings' */}
+                            <p className="text-gray-500 leading-relaxed">{settings.address || 'Ubicación pendiente'}</p>
                         </div>
                     </div>
 
@@ -96,7 +96,7 @@ export default function ContactSection() {
                             </div>
                             <div className="overflow-hidden">
                                 <h4 className="font-bold text-dark-900 text-sm">Teléfono</h4>
-                                <p className="text-gray-500 text-sm truncate">{settings?.contactPhone || '--'}</p>
+                                <p className="text-gray-500 text-sm truncate">{settings.contactPhone || '--'}</p>
                             </div>
                         </div>
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
@@ -105,7 +105,7 @@ export default function ContactSection() {
                             </div>
                             <div className="overflow-hidden">
                                 <h4 className="font-bold text-dark-900 text-sm">Email</h4>
-                                <p className="text-gray-500 text-sm truncate">{settings?.contactEmail || '--'}</p>
+                                <p className="text-gray-500 text-sm truncate">{settings.contactEmail || '--'}</p>
                             </div>
                         </div>
                     </div>
@@ -117,13 +117,13 @@ export default function ContactSection() {
                         </div>
                         <div>
                             <h4 className="font-bold text-dark-900 text-lg mb-1">Horario de Atención</h4>
-                            <p className="text-gray-500">{settings?.schedule || 'Consultar disponibilidad'}</p>
+                            <p className="text-gray-500">{settings.schedule || 'Consultar disponibilidad'}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Mapa Embed */}
-                {settings?.googleMapsUrl && (
+                {settings.googleMapsUrl && (
                     <div className="rounded-2xl overflow-hidden shadow-lg h-64 border-4 border-white">
                         <iframe 
                             src={settings.googleMapsUrl} 

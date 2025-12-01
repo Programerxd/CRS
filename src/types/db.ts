@@ -113,6 +113,16 @@ export interface Appointment {
 
     notes?: string;
     createdAt: Timestamp;
+}
 
-    
+export interface SystemSettings {
+  studioName: string;
+  contactPhone: string;
+  contactEmail: string;
+  address: string;
+  schedule: string;
+  googleMapsUrl: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  depositAmount: number;
 }

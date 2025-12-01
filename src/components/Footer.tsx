@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useStore } from '@nanostores/react';
 import { Facebook, Instagram, MapPin, Phone, Mail, Clock } from 'lucide-react';
-import { getSettings, type SystemSettings } from '../modules/admin/services/config.service';
+import { $settings } from '../store/settingsStore';
 
 export default function Footer() {
-  const [settings, setSettings] = useState<SystemSettings | null>(null);
-
-  // Cargar la configuración global al montar el componente
-  useEffect(() => {
-    const loadConfig = async () => {
-        const data = await getSettings();
-        setSettings(data);
-    };
-    loadConfig();
-  }, []);
+  // Conectar al store global (Reactivo en tiempo real)
+  const settings = useStore($settings);
 
   const currentYear = new Date().getFullYear();
 
@@ -24,7 +16,7 @@ export default function Footer() {
           {/* COLUMNA 1: MARCA */}
           <div className="col-span-1 md:col-span-1">
             <span className="font-heading font-extrabold text-xl text-primary mb-4 block">
-                {settings?.studioName || "Cuervo Rosa Studio"}
+                {settings?.studioName}
             </span>
             <p className="text-sm text-gray-500 leading-relaxed">
               Arte corporal seguro y personalizado. Transformamos ideas en arte con los más altos estándares de higiene.
@@ -42,13 +34,13 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* COLUMNA 3: CONTACTO DINÁMICO */}
+          {/* COLUMNA 3: CONTACTO (Datos en tiempo real) */}
           <div>
             <h3 className="font-heading font-bold text-dark-900 mb-4 uppercase text-sm">Contacto</h3>
             <ul className="space-y-3 text-sm text-gray-500">
               <li className="flex items-start gap-2">
                   <MapPin size={16} className="text-primary flex-shrink-0 mt-0.5"/>
-                  <span>{settings?.address || "Ubicación no definida"}</span>
+                  <span>{settings?.address || "Ubicación pendiente"}</span>
               </li>
               <li className="flex items-center gap-2">
                   <Phone size={16} className="text-primary flex-shrink-0"/>
@@ -56,16 +48,16 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                   <Mail size={16} className="text-primary flex-shrink-0"/>
-                  <span>{settings?.contactEmail || "info@cuervorosa.studio"}</span>
+                  <span>{settings?.contactEmail || "info@estudio.com"}</span>
               </li>
               <li className="flex items-center gap-2">
                   <Clock size={16} className="text-primary flex-shrink-0"/>
-                  <span>{settings?.schedule || "Horario pendiente"}</span>
+                  <span>{settings?.schedule || "Consultar horario"}</span>
               </li>
             </ul>
           </div>
 
-           {/* COLUMNA 4: REDES SOCIALES DINÁMICAS */}
+           {/* COLUMNA 4: REDES SOCIALES */}
            <div>
             <h3 className="font-heading font-bold text-dark-900 mb-4 uppercase text-sm">Conéctate</h3>
             <p className="text-sm text-gray-500 mb-4">Síguenos en nuestras redes</p>
@@ -86,7 +78,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-100 pt-8 text-center">
           <p className="text-xs text-gray-400">
-            &copy; {currentYear} {settings?.studioName || "Cuervo Rosa Studio"}. Todos los derechos reservados.
+            &copy; {currentYear} {settings?.studioName}. Todos los derechos reservados.
           </p>
         </div>
       </div>

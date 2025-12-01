@@ -2,13 +2,11 @@
 // Importamos los estilos globales
 import '../styles/global.css';
 import UserMenu from '../components/UserMenu';
-// 1. Importar componente del botón del carrito
 import CartTrigger from '../components/CartTrigger';
-// 2. Importar el cajón del carrito
 import ShoppingCartDrawer from '../modules/store/components/ShoppingCartDrawer';
 import CartSynchronizer from '../components/CartSynchronizer';
-// 3. IMPORTAR EL NUEVO FOOTER DINÁMICO
 import Footer from '../components/Footer';
+import SettingsLoader from '../components/SettingsLoader'; // <--- IMPORTANTE
 
 interface Props {
   title: string;
@@ -45,6 +43,9 @@ const links = [
   
   <body class="flex flex-col min-h-screen bg-white text-dark-600">
     
+    {/* CARGADOR DE CONFIGURACIÓN (Invisible pero vital) */}
+    <SettingsLoader client:only="react" />
+
     <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
@@ -85,8 +86,7 @@ const links = [
       <slot />
     </main>
 
-    {/* 4. REEMPLAZAMOS TODO EL HTML DEL FOOTER POR ESTE COMPONENTE INTELIGENTE */}
-    {/* Usamos client:visible para que se cargue solo cuando el usuario baje hasta el final */}
+    {/* Footer con carga visible para asegurar reactividad */}
     <Footer client:visible />
 
     <ShoppingCartDrawer client:load />
