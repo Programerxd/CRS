@@ -84,7 +84,7 @@ export default function PortfolioViewer() {
                             
                             {/* Contenido Texto */}
                             <div className="absolute bottom-0 left-0 w-full p-8 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                                <div className="w-12 h-1 bg-primary mb-4 w-0 group-hover:w-12 transition-all duration-500"></div>
+                                <div className="W-12 h-1 bg-primary mb-4 w-0 group-hover:w-12 transition-all duration-500"></div>
                                 
                                 <h3 className="text-white text-2xl md:text-3xl font-heading font-bold uppercase tracking-tight mb-2">
                                     {album.title}
