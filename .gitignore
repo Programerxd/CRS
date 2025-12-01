@@ -1,24 +1,44 @@
-# build output
-dist/
-# generated types
-.astro/
-
-# dependencies
+# --- Dependencias y Build ---
 node_modules/
+.astro/
+dist/
 
-# logs
+# --- Variables de Entorno (SEGURIDAD CRÍTICA) ---
+# Ignora todos los archivos que empiecen con .env
+.env
+.env.*
+# Excepción: Si creas un archivo de ejemplo sin datos reales, permite subirlo
+!.env.example
+
+# --- Logs y Debug ---
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# --- Firebase ---
+# Cache de emuladores y hosting
+.firebase/
+# Logs de errores de firebase
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
 
-# environment variables
-.env
-.env.production
+# --- Vercel ---
+# Cache de despliegue local de Vercel
+.vercel/
 
-# macOS-specific files
+# --- Archivos del Sistema Operativo (Basura) ---
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# jetbrains setting folder
+# --- IDEs y Editores ---
 .idea/
+.vscode/*.log
+*.swp
+*.swo
+
+# --- TypeScript ---
+*.tsbuildinfo
