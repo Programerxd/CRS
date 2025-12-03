@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { Palette, ShieldCheck, Users, ArrowRight } from "lucide-react";
+import HomeServices from "../components/HomeServices";
 ---
 
 <Layout title="Inicio | Cuervo Rosa Studio">
@@ -65,76 +66,7 @@ import { Palette, ShieldCheck, Users, ArrowRight } from "lucide-react";
           significativas.
         </p>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div
-          class="group bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
-        >
-          <div class="h-64 overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1598371839696-5c5bb62d4d88?q=80&w=800&auto=format&fit=crop"
-              alt="Tatuajes"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-          <div class="p-8">
-            <h3 class="text-2xl font-heading font-bold text-dark-900 mb-3">
-              Tatuajes
-            </h3>
-            <p class="text-dark-600 text-sm mb-6 leading-relaxed">
-              Cada línea, cada sombra, es el resultado de un proceso creativo
-              colaborativo. Creamos diseños que son una extensión de ti.
-            </p>
-           <a href="/servicios" class="inline-flex items-center text-primary font-bold hover:underline">
-                 Ver más <ArrowRight size={18} className="ml-2"/>  </a>
-          </div>
-        </div>
-
-        <div
-          class="group bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
-        >
-          <div class="h-64 overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop"
-              alt="Micropigmentación"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-          <div class="p-8">
-            <h3 class="text-2xl font-heading font-bold text-dark-900 mb-3">
-              Micropigmentación
-            </h3>
-            <p class="text-dark-600 text-sm mb-6 leading-relaxed">
-              Define, realza y armoniza tus rasgos con precisión artística. Un
-              acabado natural y duradero para tu rostro.
-            </p>
-            <a href="/servicios" class="inline-flex items-center text-primary font-bold hover:underline">
-               Ver más <ArrowRight size={18} className="ml-2"/>  </a>
-          </div>
-        </div>
-
-        <div
-          class="group bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
-        >
-          <div class="h-64 overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?q=80&w=800&auto=format&fit=crop"
-              alt="Piercing"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-          <div class="p-8">
-            <h3 class="text-2xl font-heading font-bold text-dark-900 mb-3">
-              Piercings Profesionales
-            </h3>
-            <p class="text-dark-600 text-sm mb-6 leading-relaxed">
-              Una forma audaz de expresión con joyería de alta calidad y
-              materiales hipoalergénicos certificados.
-            </p>
-            <a href="/servicios" class="inline-flex items-center text-primary font-bold hover:underline">
-               Ver más <ArrowRight size={18} className="ml-2"/>  </a>
-          </div>
-        </div>
+      <HomeServices client:visible />
       </div>
     </div>
   </section>

@@ -1,52 +1,69 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase/client';
-import { $cart } from '../store/cartStore'; // Ya no importamos clearCart aquí
+import { $cart } from '../store/cartStore'; 
 import { getCartFromCloud, saveCartToCloud } from '../modules/store/services/store.service';
 
 export default function CartSynchronizer() {
   const cart = useStore($cart);
+  // CORRECCIÓN: Nombre de variable correcto y tipado automático
+  const [isSyncComplete, setIsSyncComplete] = useState(false);
 
-  // 1. ESCUCHAR CAMBIOS DE SESIÓN (Solo Login)
+  // 1. ESCUCHAR INICIO DE SESIÓN (Sincronización Inicial)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // --- USUARIO INICIÓ SESIÓN (FUSIÓN) ---
-            console.log("Sincronizando carrito de:", user.email);
+            console.log(" Usuario detectado. Iniciando fusión de carritos...");
             
-            // A. Traer carrito de la nube
-            const cloudCart = await getCartFromCloud(user.uid);
-            
-            // B. Fusionar con el carrito local actual 
-            // (Prioridad: Lo que acaba de agregar localmente sobreescribe lo viejo de la nube si hay conflicto, o viceversa según prefieras)
-            const localCart = $cart.get();
-            
-            // Estrategia de fusión: Sumar cantidades o mantener la local. 
-            // Para simplicidad empresarial: Fusionamos objetos.
-            const mergedCart = { ...cloudCart, ...localCart };
-            
-            // C. Actualizar ambos
-            $cart.set(mergedCart);
-            await saveCartToCloud(user.uid, mergedCart);
-        } 
-        // ELIMINAMOS EL ELSE. 
-        // Si es guest (user es null), NO HACEMOS NADA. Dejamos que el persistentMap mantenga los datos.
+            try {
+                // A. Traer carrito guardado en la nube
+                const cloudCart = await getCartFromCloud(user.uid);
+                
+                // B. Obtener carrito local actual
+                const localCart = $cart.get();
+                
+                // C. Fusionar: Lo local prevalece sobre lo viejo de la nube en caso de conflicto
+                // (O puedes sumar cantidades si prefieres una lógica más compleja)
+                const mergedCart = { ...cloudCart, ...localCart };
+                
+                // D. Actualizar estado local y nube
+                $cart.set(mergedCart);
+                await saveCartToCloud(user.uid, mergedCart);
+                
+            } catch (error) {
+                console.error("Error en sincronización inicial:", error);
+            } finally {
+                // E. IMPORTANTE: Marcar que ya terminamos de cargar
+                // Esto habilita el "escucha" en tiempo real del useEffect de abajo
+                setIsSyncComplete(true); 
+            }
+        } else {
+            // Si no hay usuario, apagamos la bandera de sincronización
+            setIsSyncComplete(false);
+        }
     });
     return () => unsubscribe();
   }, []);
 
-  // 2. ESCUCHAR CAMBIOS EN EL CARRITO (Para guardar en tiempo real si es usuario)
+  // 2. ESCUCHAR CAMBIOS EN EL CARRITO (Tiempo Real)
   useEffect(() => {
     const user = auth.currentUser;
-    // Solo guardamos en nube si hay usuario autenticado
-    if (user && Object.keys(cart).length > 0) {
+
+    // LÓGICA EMPRESARIAL CORREGIDA:
+    // Solo guardamos si hay un usuario Y si la carga inicial ya terminó.
+    if (user && isSyncComplete) {
+        
         const timeout = setTimeout(() => {
+            // CAMBIO CLAVE: Quitamos la condición "if (Object.keys(cart).length > 0)"
+            // Ahora, incluso si 'cart' está vacío {}, se enviará a Firebase.
+            // Esto asegura que si borras el último producto, se borre también en la nube.
             saveCartToCloud(user.uid, cart);
-        }, 1000);
+        }, 500); // Debounce de 500ms para no saturar la base de datos
+
         return () => clearTimeout(timeout);
     }
-  }, [cart]);
+  }, [cart, isSyncComplete]); // Dependencias correctas
 
   return null;
 }

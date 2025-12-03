@@ -1,81 +1,10 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { Users, Calendar, DollarSign, AlertTriangle } from 'lucide-react';
+// Importamos el nuevo componente Dashboard completo
+import DashboardPage from '../../modules/admin/pages/DashboardPage';
 ---
 
 <AdminLayout title="Dashboard">
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Citas Hoy</p>
-                    <h3 class="text-3xl font-heading font-bold text-dark-900 mt-2">8</h3>
-                </div>
-                <div class="p-3 bg-purple-50 text-purple-600 rounded-lg">
-                    <Calendar className="w-6 h-6" />
-                </div>
-            </div>
-            <p class="text-xs text-green-600 font-bold mt-4 flex items-center">
-                <span class="bg-green-100 px-1.5 py-0.5 rounded mr-2">↑ 12%</span> vs ayer
-            </p>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Ingresos Mes</p>
-                    <h3 class="text-3xl font-heading font-bold text-dark-900 mt-2">$45k</h3>
-                </div>
-                <div class="p-3 bg-green-50 text-green-600 rounded-lg">
-                    <DollarSign className="w-6 h-6" />
-                </div>
-            </div>
-            <p class="text-xs text-gray-400 mt-4">Actualizado hace 5 min</p>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Clientes</p>
-                    <h3 class="text-3xl font-heading font-bold text-dark-900 mt-2">124</h3>
-                </div>
-                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                    <Users className="w-6 h-6" />
-                </div>
-            </div>
-            <p class="text-xs text-green-600 font-bold mt-4 flex items-center">
-                <span class="bg-green-100 px-1.5 py-0.5 rounded mr-2">+ 5</span> esta semana
-            </p>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-red-100 relative overflow-hidden">
-            <div class="absolute right-0 top-0 w-16 h-16 bg-red-500/10 rounded-bl-full -mr-4 -mt-4"></div>
-            <div class="flex justify-between items-start relative z-10">
-                <div>
-                    <p class="text-xs font-bold text-red-500 uppercase tracking-wider">Alertas Stock</p>
-                    <h3 class="text-3xl font-heading font-bold text-dark-900 mt-2">3</h3>
-                </div>
-                <div class="p-3 bg-red-50 text-red-500 rounded-lg">
-                    <AlertTriangle className="w-6 h-6" />
-                </div>
-            </div>
-            <p class="text-xs text-red-500 font-medium mt-4">
-                Tinta Negra, Agujas 3RL...
-            </p>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-            <h3 class="font-heading font-bold text-lg text-dark-900">Próximas Citas</h3>
-            <a href="/admin/agenda" class="text-sm text-primary font-bold hover:underline">Ver Calendario</a>
-        </div>
-        <div class="p-6 text-center text-gray-400 py-12">
-            <Calendar className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p>Aquí aparecerá la lista de citas del día.</p>
-        </div>
-    </div>
-
+    {/* Usamos client:only="react" porque depende 100% de datos del cliente (Firebase) */}
+    <DashboardPage client:only="react" />
 </AdminLayout>

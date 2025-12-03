@@ -1,28 +1,17 @@
 ---
-// Importamos los estilos globales
 import '../styles/global.css';
-import UserMenu from '../components/UserMenu';
-import CartTrigger from '../components/CartTrigger';
+import Header from '../components/Header'; // <--- Importamos el Header nuevo
 import ShoppingCartDrawer from '../modules/store/components/ShoppingCartDrawer';
 import CartSynchronizer from '../components/CartSynchronizer';
 import Footer from '../components/Footer';
-import SettingsLoader from '../components/SettingsLoader'; // <--- IMPORTANTE
+import SettingsLoader from '../components/SettingsLoader';
 
 interface Props {
   title: string;
   description?: string;
 }
 
-const { title, description = "Cuervo Rosa Studio - Arte corporal seguro y personalizado." } = Astro.props;
-
-const links = [
-  { name: "Inicio", href: "/" },
-  { name: "Productos", href: "/productos" },
-  { name: "Servicios", href: "/servicios" },
-  { name: "Portafolio", href: "/portafolio" },
-  { name: "Artistas", href: "/artistas" },
-  { name: "Contacto", href: "/contacto" },
-];
+const { title, description = "Cuervo Rosa Studio" } = Astro.props;
 ---
 
 <!doctype html>
@@ -31,66 +20,26 @@ const links = [
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon (2).png" />
     <meta name="generator" content={Astro.generator} />
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
-
     <title>{title}</title>
   </head>
   
   <body class="flex flex-col min-h-screen bg-white text-dark-600">
-    
-    {/* CARGADOR DE CONFIGURACIÓN (Invisible pero vital) */}
     <SettingsLoader client:only="react" />
 
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
-          
-          <a href="/" class="font-heading font-extrabold text-2xl text-primary tracking-tight">
-            Cuervo Rosa Studio
-          </a>
-
-          <nav class="hidden md:flex space-x-8">
-            {links.map((link) => (
-              <a href={link.href} class="text-sm font-medium text-dark-600 hover:text-primary transition-colors font-heading uppercase tracking-wide">
-                {link.name}
-              </a>
-            ))}
-          </nav>
-
-          <div class="hidden md:flex items-center space-x-4">
-            <CartTrigger client:load />
-            <UserMenu client:only="react" />
-            <a href="/agendar" class="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg transition-all transform hover:scale-105">
-              Agendar Cita
-            </a>
-          </div>
-
-          <div class="flex items-center gap-4 md:hidden">
-            <CartTrigger client:load />
-            <button class="text-dark-900 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    {/* El Header maneja toda la lógica del menú móvil */}
+    <Header client:load />
 
     <main class="flex-grow">
       <slot />
     </main>
 
-    {/* Footer con carga visible para asegurar reactividad */}
     <Footer client:visible />
-
     <ShoppingCartDrawer client:load />
     <CartSynchronizer client:only="react" />
-
   </body>
 </html>

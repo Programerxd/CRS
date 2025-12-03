@@ -58,7 +58,7 @@ export const processOrder = async (cartItems: CartItem[], clientInfo: any) => {
 export const saveCartToCloud = async (userId: string, cartItems: Record<string, CartItem>) => {
     if (!userId) return;
     try {
-        // Guardamos en una subcolección o documento del usuario
+        // Al enviar cartItems vacío {}, esto limpiará la lista en Firestore.
         await setDoc(doc(db, "users", userId, "cart", "active"), { 
             items: cartItems,
             updatedAt: new Date()
@@ -81,3 +81,4 @@ export const getCartFromCloud = async (userId: string) => {
     }
     return {};
 };
+
