@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
+import { useStore } from '@nanostores/react'; // 1. Importar el hook del store
 import { ShoppingCart, MessageCircle } from 'lucide-react';
 import { getProductsForSale } from '../services/store.service';
 import { addToCart } from '../../../store/cartStore';
+import { $settings } from '../../../store/settingsStore'; // 2. Importar el store de configuración
 import type { Product } from '../../../types/db';
 
 export default function ProductGrid() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // 3. Conectamos con la configuración global en tiempo real
+  const settings = useStore($settings);
 
   useEffect(() => {
     async function load() {
@@ -17,10 +22,21 @@ export default function ProductGrid() {
     load();
   }, []);
 
-  // Función para pedir directo por WhatsApp (Como en tus capturas)
+  // Función para pedir directo por WhatsApp (Dinámica)
   const handleWhatsAppOrder = (product: Product) => {
-    const msg = `Hola Cuervo Rosa, me interesa ordenar: ${product.name} (Precio: $${product.price}).`;
-    window.open(`https://wa.me/529971234567?text=${encodeURIComponent(msg)}`, '_blank');
+    // A. Validar que exista configuración
+    const phone = settings.contactPhone;
+    
+    if (!phone) {
+        alert("El número de contacto no está configurado por el momento.");
+        return;
+    }
+
+    // B. Construir mensaje
+    const msg = `Hola ${settings.studioName || 'Cuervo Rosa'}, me interesa ordenar: ${product.name} (Precio: $${product.price}).`;
+    
+    // C. Abrir WhatsApp con el número del Admin
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   if (loading) return <div className="text-center py-20">Cargando productos...</div>;
@@ -55,7 +71,7 @@ export default function ProductGrid() {
                 </div>
 
                 <div className="flex gap-2">
-                    {/* Botón WhatsApp (Ordenar rápido) */}
+                    {/* Botón WhatsApp (Ahora usa settings.contactPhone) */}
                     <button 
                         onClick={() => handleWhatsAppOrder(product)}
                         disabled={product.currentStock === 0}
